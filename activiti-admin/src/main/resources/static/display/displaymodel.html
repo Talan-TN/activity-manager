@@ -1,0 +1,354 @@
+<html>
+    <head>
+        <title>BPMN 2.0 display</title>
+        <link type="text/css" rel="stylesheet" href="display/jquery.qtip.min.css" />
+        <link type="text/css" rel="stylesheet" href="display/displaymodel.css" />
+        <script type="text/javascript" src="display/jquery.qtip.min.js"></script>
+        <script type="text/javascript" src="display/raphael.js"></script>
+        <script type="text/javascript" src="display/bpmn-draw.js"></script>
+        <script type="text/javascript" src="display/bpmn-icons.js"></script>
+        <script type="text/javascript" src="display/Polyline.js"></script>
+        <script type="text/javascript">
+        	var NORMAL_STROKE = 1;
+        	var SEQUENCEFLOW_STROKE = 1.5;
+        	var TASK_STROKE = 1;
+        	var CALL_ACTIVITY_STROKE = 2;
+        	var ENDEVENT_STROKE = 3;
+        	var CURRENT_ACTIVITY_STROKE = 2;
+
+        	var COMPLETED_COLOR= "#2674aa";
+        	var TEXT_COLOR= "#373e48";
+        	var CURRENT_COLOR= "#66AA66";
+        	var HOVER_COLOR= "#666666";
+        	var ACTIVITY_STROKE_COLOR = "#bbbbbb";
+        	var ACTIVITY_FILL_COLOR = "#f9f9f9";
+        	var MAIN_STROKE_COLOR = "#585858";
+
+        	var TEXT_PADDING = 3;
+        	var ARROW_WIDTH = 4;
+        	var MARKER_WIDTH = 12;
+
+        	var TASK_FONT = {font: "11px Arial", opacity: 1, fill: Raphael.rgb(0, 0, 0)};
+
+        	// icons
+        	var ICON_SIZE = 16;
+        	var ICON_PADDING = 4;
+
+        	var INITIAL_CANVAS_WIDTH;
+        	var INITIAL_CANVAS_HEIGHT;
+
+        	var paper;
+        	var viewBox;
+        	var viewBoxWidth;
+        	var viewBoxHeight;
+
+        	var canvasWidth;
+        	var canvasHeight;
+
+        	var definitionId = $('#bpmnModel').attr('data-definition-id');
+        	var instanceId = $('#bpmnModel').attr('data-instance-id');
+        	var serverId = $('#bpmnModel').attr('data-server-id');
+
+            var elementsAdded = new Array();
+            var elementsRemoved = new Array();
+
+        	function _showTip(htmlNode, element)
+          	{
+        		var documentation = "";
+        		if (element.name && element.name.length > 0)
+        		{
+        			documentation += "<b>Name</b>: <i>" + element.name + "</i><br/><br/>";
+        		}else{
+              documentation += "<b>Expression</b>: <i>" + element.conditionExpression + "</i><br/><br/>";
+            }
+                var propetiesHtml = "";
+                if(element.properties){
+                    for(var i= 0 ; i < element.properties.length ; i++){
+                        propetiesHtml += "<b>"+element.properties[i]['name']+" : </b>"+element.properties[i]['value']+"<br/>";
+                    }
+                }
+
+                if(element.executionListeners){
+                    propetiesHtml += "<b>Execution Listeners: </b>"+element.executionListeners+"<br/>";
+                }
+
+                if(element.eventDefinition){
+                  for(var prop in element.eventDefinition){
+                        propetiesHtml += "<b>"+prop+" : </b>"+element.eventDefinition[prop]+"<br/>";
+                    }
+                }
+
+                documentation += propetiesHtml;
+
+        		var text;
+        		if (element.name && element.name.length > 0)
+        		{
+        			text = element.name;
+        		}
+        		else{
+                    text = element.id;
+        		}
+
+          		htmlNode.qtip({
+                	content: {
+                  		text: documentation,
+                  		title: {
+                	  		text: text
+                  		}
+                	},
+	                position: {
+	                  my: 'top left',
+	                  at: 'bottom center',
+	                  viewport: $(window)
+	                },
+	                hide: {
+	                  fixed: true, delay: 100,
+	                  event: 'click mouseleave'
+	                },
+	                style: {
+	                	classes: 'ui-tooltip-kisbpm-bpmn'
+	                }
+              });
+          	}
+
+        	function _addHoverLogic(element, type, defaultColor)
+        	{
+        	    var strokeColor = _bpmnGetColor(element, defaultColor);
+        		var topBodyRect;
+        		if (type === "rect")
+        		{
+        			topBodyRect = paper.rect(element.x, element.y, element.width, element.height);
+        		}
+        		else if (type === "circle")
+        		{
+        			var x = element.x + (element.width / 2);
+        			var y = element.y + (element.height / 2);
+        			topBodyRect = paper.circle(x, y, 15);
+        		}
+        		else if (type === "rhombus")
+        		{
+        			topBodyRect = paper.path("M" + element.x + " " + (element.y + (element.height / 2)) +
+       					"L" + (element.x + (element.width / 2)) + " " + (element.y + element.height) +
+       					"L" + (element.x + element.width) + " " + (element.y + (element.height / 2)) +
+       					"L" + (element.x + (element.width / 2)) + " " + element.y + "z"
+       				);
+        		}
+
+        		var opacity = 0;
+        		var fillColor = "#ffffff";
+        		if ($.inArray(element.id, elementsAdded) >= 0)
+        		{
+        			opacity = 0.2;
+            		fillColor = "green";
+        		}
+
+        		if ($.inArray(element.id, elementsRemoved) >= 0)
+        		{
+        			opacity = 0.2;
+            		fillColor = "red";
+        		}
+
+          		topBodyRect.attr({
+          			"opacity": opacity,
+	                "stroke" : "none",
+	                "fill" : fillColor
+	          	});
+          		_showTip($(topBodyRect.node), element);
+
+          		topBodyRect.mouseover(function() {
+          			paper.getById(element.id).attr({"stroke": HOVER_COLOR});
+          		});
+
+          		topBodyRect.mouseout(function() {
+          			paper.getById(element.id).attr({"stroke": strokeColor});
+          		});
+        	}
+
+        	function _zoom(zoomIn)
+        	{
+        		var tmpCanvasWidth, tmpCanvasHeight;
+                if (zoomIn)
+                {
+                	tmpCanvasWidth = canvasWidth * (1.0/0.90);
+                	tmpCanvasHeight = canvasHeight * (1.0/0.90);
+                }
+                else
+                {
+                	tmpCanvasWidth = canvasWidth * (1.0/1.10);
+                	tmpCanvasHeight = canvasHeight * (1.0/1.10);
+                }
+
+                if (tmpCanvasWidth != canvasWidth || tmpCanvasHeight != canvasHeight)
+                {
+                	canvasWidth = tmpCanvasWidth;
+                	canvasHeight = tmpCanvasHeight;
+                	paper.setSize(canvasWidth, canvasHeight);
+                }
+        	}
+
+        	var request;
+        	if(instanceId != null) {
+				request = $.ajax({
+				    type: 'get',
+				    url: './rest/activiti/process-instances/' + instanceId + '/model-json?processDefinitionId=' + definitionId + '&nocaching=' + new Date().getTime()
+				});
+        	} else {
+				request = $.ajax({
+				    type: 'get',
+				    url: './rest/activiti/process-definitions/' + definitionId + '/model-json?nocaching=' + new Date().getTime()
+				});
+        	}
+
+            var mousedown     = false;
+
+			request.success(function(data, textStatus, jqXHR) {
+
+				if (!data.elements || data.elements.length == 0) return;
+
+				INITIAL_CANVAS_WIDTH = 1000;
+				INITIAL_CANVAS_HEIGHT = 1000;
+				canvasWidth = window.innerWidth  ;
+				canvasHeight = INITIAL_CANVAS_HEIGHT;
+				viewBoxWidth = INITIAL_CANVAS_WIDTH;
+				viewBoxHeight = INITIAL_CANVAS_HEIGHT;
+
+				var x = 0;
+				if ($(window).width() > canvasWidth)
+				{
+					x = ($(window).width() - canvasWidth) / 2 - (data.diagramBeginX / 2);
+				}
+
+				
+				$('#bpmnModel').height(INITIAL_CANVAS_HEIGHT);
+				paper = Raphael(document.getElementById('bpmnModel'), canvasWidth, canvasHeight);
+				viewBox = paper.setViewBox(0, 0, viewBoxWidth, viewBoxHeight, false);
+                var oX            = 0, oY = 0, oWidth = viewBoxWidth, oHeight = viewBoxHeight;
+                viewBox.X         = oX;
+                viewBox.Y         = oY;
+          		paper.renderfix();
+
+          		if (data.pools)
+          		{
+          			for (var i = 0; i < data.pools.length; i++)
+				    {
+				    	var pool = data.pools[i];
+				    	_drawPool(pool);
+				    }
+          		}
+
+			    var modelElements = data.elements;
+			    for (var i = 0; i < modelElements.length; i++)
+			    {
+			    	var element = modelElements[i];
+			    	//try {
+			    		//console.log(element.type);
+			    		var drawFunction = eval("_draw" + element.type);
+			    		drawFunction(element);
+			    	//} catch(err) {console.log(err);}
+			    }
+
+			    if (data.flows)
+			    {
+				    for (var i = 0; i < data.flows.length; i++)
+				    {
+				    	var flow = data.flows[i];
+				    	_drawFlow(flow);
+				    }
+			    }
+			});
+
+			request.error(function(jqXHR, textStatus, errorThrown) {
+			    alert("Process Instance BPMN Not Found");
+			});
+
+            function handle(delta) {
+              vBHo = viewBoxHeight;
+              vBWo = viewBoxWidth;
+              if(delta < 0){
+                viewBoxWidth  *= 0.95;
+                viewBoxHeight *= 0.95;
+              }else{
+                viewBoxWidth  *= 1.05;
+                viewBoxHeight *= 1.05;
+              }
+              /*
+                vB.attr({
+                  x: viewBox.X,
+                  y: viewBox.Y,
+                  width: viewBoxWidth,
+                  height: viewBoxHeight
+                });
+              */
+              viewBox.X -= (viewBoxWidth - vBWo) / 2;
+              viewBox.Y -= (viewBoxHeight - vBHo) / 2;
+              paper.setViewBox(viewBox.X,viewBox.Y,viewBoxWidth,viewBoxHeight);
+            }
+            /** Event handler for mouse wheel event.
+             */
+            function wheel(event){
+              var delta = 0;
+              if(!event){ /* For IE. */
+                event = window.event;
+              }
+              if(event.wheelDelta){ /* IE/Opera. */
+                delta = event.wheelDelta/120;
+              } else if (event.detail) { /** Mozilla case. */
+                /** In Mozilla, sign of delta is different than in IE.
+                 * Also, delta is multiple of 3.
+                 */
+                delta = -event.detail/3;
+              }
+              /** If delta is nonzero, handle it.
+               * Basically, delta is now positive if wheel was scrolled up,
+               * and negative, if wheel was scrolled down.
+               */
+              if(delta){
+                handle(delta);
+              }
+              /** Prevent default actions caused by mouse wheel.
+               * That might be ugly, but we handle scrolls somehow
+               * anyway, so don't bother here..
+               */
+              if(event.preventDefault){
+                event.preventDefault();
+              }
+              event.returnValue = false;
+            }
+            /** Initialization code. 
+             * If you use your own event management code, change it as required.
+             */
+            
+            /** DOMMouseScroll is for mozilla. */
+            window.document.getElementById("bpmnModel").addEventListener('DOMMouseScroll', wheel, false);
+            /** IE/Opera. */
+            window.document.getElementById("bpmnModel").onmousewheel = wheel;
+            //Pan
+            $("#bpmnModel").mousedown(function(e){
+              if (paper.getElementByPoint( e.pageX, e.pageY ) !== null){
+                return;
+              }
+              mousedown = true;
+              startX = e.pageX; 
+              startY = e.pageY;    
+            });
+            $("#bpmnModel").mousemove(function(e){
+              if (mousedown === false) {return;}
+              dX  = startX - e.pageX;
+              dY  = startY - e.pageY;
+              x   = viewBoxWidth / paper.width; 
+              y   = viewBoxHeight / paper.height; 
+              dX *= x; 
+              dY *= y; 
+              //alert(viewBoxWidth +" "+ paper.width );
+              paper.setViewBox(viewBox.X + dX, viewBox.Y + dY, viewBoxWidth, viewBoxHeight);
+            });
+            $("#bpmnModel").mouseup(function(e){
+              if ( mousedown === false ) return; 
+              viewBox.X += dX; 
+              viewBox.Y += dY; 
+              mousedown = false; 
+            });
+
+		</script>
+    </head>
+</html>

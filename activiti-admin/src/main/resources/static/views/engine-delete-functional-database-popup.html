@@ -1,0 +1,27 @@
+<div class="modal-header-wrapper">
+    <div class="modal-header">
+        <div class="pull-right">
+            <a class="action" ng-click="cancel()">&times; {{'GENERAL.ACTION.CANCEL-AND-CLOSE' | translate:dc}}</a>
+        </div>
+        <h2>{{'DATABASE.POPUP.DELETE.DELETE-FUNCTIONAL-DATABASE-CONFIG' | translate}}</h2>
+    </div>
+</div>
+<div class="modal-body">
+    <div style="margin-top:40px">
+        {{'DATABASE.POPUP.DELETE.MESSAGE' | translate}}
+    </div>
+</div>
+
+<div class="modal-footer-wrapper">
+    <div class="modal-footer">
+        <div class="pull-right">
+            <button type="button" class="btn btn-sm btn-default" ng-click="cancel()" ng-disabled="status.loading"
+                    translate="GENERAL.ACTION.CANCEL">
+            </button>
+            <button type="button" class="btn btn-sm btn-danger" ng-click="deleteSelectedDatabaseConfig()" ng-disabled="status.loading">
+                {{'DATABASE.POPUP.DELETE.BUTTON' | translate}}
+            </button>
+        </div>
+        <loading-indicator></loading-indicator>
+    </div>
+</div>

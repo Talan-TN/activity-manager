@@ -1,0 +1,213 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-9 component">
+
+            <div class="title">
+                <h2 translate="CLUSTER.TITLE.ENDPOINT"></h2>
+            </div>
+            <p class="message"><i class="glyphicon glyphicon-info-sign"></i>
+                {{'CLUSTER.ENDPOINT-HELP' | translate}}
+            </p>
+
+            <div class="property-wrapper">
+                <table>
+                    <tr class="property">
+                        <td class="property-name" translate="CLUSTER.ENDPOINT-NAME"></td>
+                        <td>{{activeServer.name | empty}}</td>
+                        <td class="property-name" translate="CLUSTER.ENDPOINT-DESCRIPTION"></td>
+                        <td>{{activeServer.description | empty}}</td>
+                    </tr>
+                    <tr class="property">
+                        <td class="property-name" translate="CLUSTER.ENDPOINT-ADDRESS"></td>
+                        <td>{{activeServer.serverAddress | empty}}</td>
+                        <td class="property-name" translate="CLUSTER.ENDPOINT-PORT"></td>
+                        <td>{{activeServer.serverPort | empty}}</td>
+                    </tr>
+                    <tr class="property">
+                        <td class="property-name" translate="CLUSTER.ENDPOINT-CONTEXT-ROOT"></td>
+                        <td>{{activeServer.contextRoot | empty}}</td>
+                        <td class="property-name" translate="CLUSTER.ENDPOINT-REST-ROOT"></td>
+                        <td>{{activeServer.restRoot | empty}}</td>
+                    </tr>
+                    <tr class="property">
+                        <td class="property-name" translate="CLUSTER.ENDPOINT-USERNAME"></td>
+                        <td>{{activeServer.userName | empty}}</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+            <div class="component tip-left">
+                <div class="title">
+                    <h2 translate="GENERAL.TITLE.ACTIONS"></h2>
+                </div>
+                <div class="seperator"></div>
+                <ul class="list-group">
+                    <li>
+                        <button type="button" class="btn btn-sm btn-default" ng-click="editEndpointConfig()">
+                            <i class="glyphicon glyphicon-pencil"></i>{{'CLUSTER.ACTION.EDIT-ENDPOINT' | translate}}
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="btn btn-sm btn-default" ng-click="checkEndpointConfig()">
+                            <i class="glyphicon glyphicon-ok"></i>{{'CLUSTER.ACTION.CHECK-ENDPOINT' | translate}}
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9 component">
+
+            <div class="title">
+                <h2 translate="DATABASE.TITLE"></h2>
+            </div>
+            <p class="message"><i class="glyphicon glyphicon-info-sign"></i>
+                {{'DATABASE.DATABASE-HELP' | translate}}
+            </p>
+            <div class="grid-wrapper" id="databaseConfig">
+                <div class="grid-message" ng-if="databaseConfigData.size > 0">
+                    <span>{{'DATABASE.LIST-MESSAGE' | translate:jobs}}</span>
+                </div>
+                <div class="grid-message" ng-if="databaseConfigData.size == 0">
+                    <span>{{'DATABASE.LIST-MESSAGE-EMPTY' | translate}}</span>
+                </div>
+                <div ng-grid="gridFunctionalDatabaseConfig" class="gridStyle" ng-if="gridFunctionalDatabaseConfig && databaseConfigData"/>
+            </div>
+
+            
+
+        </div>
+
+        <div class="col-md-3">
+            <div class="component tip-left">
+                <div class="title">
+                    <h2 translate="GENERAL.TITLE.ACTIONS"></h2>
+                </div>
+                <div class="seperator"></div>
+                <ul class="list-group">
+                    <li>
+                        <button type="button" class="btn btn-sm btn-default" ng-click="addDatabaseConfig()">
+                            <i class="glyphicon glyphicon-plus"></i>{{'DATABASE.ACTION.ADD-CONFIG' | translate}}
+                        </button>
+                    </li>
+                     <li ng-if="selectedDatabaseConfig && selectedDatabaseConfig.length > 0">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="checkDatabaseConfig()">
+                            <i class="glyphicon glyphicon-ok"></i>{{'DATABASE.ACTION.CHECK-CONFIG' | translate}}
+                        </button>
+                    </li>
+                    <li ng-if="selectedDatabaseConfig && selectedDatabaseConfig.length > 0">
+                        <button type="button" class="btn btn-sm btn-default" ng-click="updateSelectedDatabaseConfig()">
+                            <i class="glyphicon glyphicon-pencil"></i>{{'DATABASE.ACTION.EDIT-CONFIG' | translate}}
+                        </button>
+                    </li>
+                    <li ng-if="selectedDatabaseConfig && selectedDatabaseConfig.length > 0">
+                        <button type="button" class="btn btn-sm btn-danger" ng-click="deleteSelectedDatabaseConfig()">
+                            <i class="glyphicon glyphicon-remove"></i>{{'DATABASE.ACTION.DELETE-CONFIG' | translate}}
+                        </button>
+                    </li>
+                    <li ng-if="selectedDatabaseConfig && selectedDatabaseConfig[0].active == false">
+                        <button type="button" class="btn btn-sm btn-primary" ng-click="activateDatabaseConfig()">
+                            <i class="glyphicon glyphicon-repeat"></i>{{'DATABASE.ACTION.ACTIVATE-CONFIG' | translate}}
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9 component">
+
+            <div class="title">
+                <h2 translate="FUNCTIONAL-MAPPING.TITLE"></h2>
+            </div>
+            <p class="message"><i class="glyphicon glyphicon-info-sign"></i>
+                {{'FUNCTIONAL-MAPPING.HELP' | translate}}
+            </p>
+            <div class="grid-wrapper" id="functionalMapping">
+                <div class="grid-message" ng-if="functionalMappingData.size > 0">
+                    <span>{{'FUNCTIONAL-MAPPING.LIST-MESSAGE' | translate:jobs}}</span>
+                </div>
+                <div class="grid-message" ng-if="functionalMappingData.size == 0">
+                    <span>{{'FUNCTIONAL-MAPPING.LIST-MESSAGE-EMPTY' | translate}}</span>
+                </div>
+                <div ng-grid="gridFunctionalMapping" class="gridStyle" ng-if="gridFunctionalMapping && functionalMappingData"/>
+            </div>
+
+        </div>
+        <div class="col-md-3">
+            <div class="component tip-left">
+                <div class="title">
+                    <h2 translate="FUNCTIONAL-MAPPING.ACTION-TITLE"></h2>
+                </div>
+                <div class="seperator"></div>
+                <ul class="list-group">
+                    <li>
+                        <button type="button" class="btn btn-sm btn-default" ng-click="addFunctionalMapping()">
+                            <i class="glyphicon glyphicon-plus"></i>{{'FUNCTIONAL-MAPPING.ACTION.ADD-FUNCTIONAL-MAPPING' | translate}}
+                        </button>
+                    </li>
+                    <li ng-if="selectedFunctionalMapping && selectedFunctionalMapping.length > 0">
+                        <button type="button" class="btn btn-sm btn-default" ng-click="updateSelectedFunctionalMapping()">
+                            <i class="glyphicon glyphicon-pencil"></i>{{'FUNCTIONAL-MAPPING.ACTION.UPDATE-FUNCTIONAL-MAPPING' | translate}}
+                        </button>
+                    </li>
+                    <li ng-if="selectedFunctionalMapping && selectedFunctionalMapping.length > 0">
+                        <button type="button" class="btn btn-sm btn-danger" ng-click="deleteSelectedFunctionalMapping()">
+                            <i class="glyphicon glyphicon-remove"></i>{{'FUNCTIONAL-MAPPING.ACTION.DELETE-FUNCTIONAL-MAPPING' | translate}}
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9 component">
+
+            <div class="title">
+                <h2 translate="FILTERS-CONFIG.TITLE"></h2>
+            </div>
+            <p class="message"><i class="glyphicon glyphicon-info-sign"></i>
+                {{'FILTERS-CONFIG.HELP' | translate}}
+            </p>
+            <div class="grid-wrapper" id="filterConfig">
+                <div class="grid-message" ng-if="filtersConfigData.size > 0">
+                    <span>{{'FILTERS-CONFIG.LIST-MESSAGE' | translate:jobs}}</span>
+                </div>
+                <div class="grid-message" ng-if="filtersConfigData.size == 0">
+                    <span>{{'FILTERS-CONFIG.LIST-MESSAGE-EMPTY' | translate}}</span>
+                </div>
+                <div ng-grid="gridFiltersConfig" class="gridStyle" ng-if="gridFiltersConfig && filtersConfigData"/>
+            </div>
+
+        </div>
+        <div class="col-md-3">
+            <div class="component tip-left">
+                <div class="title">
+                    <h2 translate="FILTERS-CONFIG.ACTION-TITLE"></h2>
+                </div>
+                <div class="seperator"></div>
+                <ul class="list-group">
+                    <li>
+                        <button type="button" class="btn btn-sm btn-default" ng-click="addFilterConfig()">
+                            <i class="glyphicon glyphicon-plus"></i>{{'FILTERS-CONFIG.ACTION.ADD-FILTER-CONFIG' | translate}}
+                        </button>
+                    </li>
+                    <li ng-if="selectedFiltersConfig && selectedFiltersConfig.length > 0">
+                        <button type="button" class="btn btn-sm btn-default" ng-click="updateSelectedFilterConfig()">
+                            <i class="glyphicon glyphicon-pencil"></i>{{'FILTERS-CONFIG.ACTION.UPDATE-FILTER-CONFIG' | translate}}
+                        </button>
+                    </li>
+                    <li ng-if="selectedFiltersConfig && selectedFiltersConfig.length > 0">
+                        <button type="button" class="btn btn-sm btn-danger" ng-click="deleteSelectedFilterConfig()">
+                            <i class="glyphicon glyphicon-remove"></i>{{'FILTERS-CONFIG.ACTION.DELETE-FILTER-CONFIG' | translate}}
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

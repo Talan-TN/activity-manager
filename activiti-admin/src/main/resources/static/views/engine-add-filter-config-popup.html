@@ -1,0 +1,76 @@
+<div class="modal-header-wrapper">
+    <div class="modal-header">
+        <div class="pull-right">
+            <a class="action" ng-click="cancel()" ng-show="!status.loading">&times; Cancel and close</a>
+        </div>
+        <h2>Add Filter Configuration</h2>
+    </div>
+</div>
+<div class="modal-body">
+    <table class="edit-table">
+        <tr>
+            <td class="edit-label" translate="FILTERS-CONFIG.GRID.FILTER-NAME"></td>
+            <td>
+                <input type="text" class="form-control" id="filterName"
+                       ng-model="model.filterConfig.filterName">
+            </td>
+        </tr>
+        <tr>
+            <td class="edit-label" translate="FILTERS-CONFIG.GRID.PROCESS-ID-COLUMN-NAME"></td>
+            <td>
+                <input type="text" class="form-control" id="processIdColumnName"
+                       ng-model="model.filterConfig.processIdColumnName">
+            </td>
+        </tr>
+        <tr>
+            <td class="edit-label" translate="FILTERS-CONFIG.GRID.PROCESSDEFINITIONKEY"></td>
+            <td>
+                <select ui-select2
+                        data-placeholder="Select process definition"
+                        ng-model="model.filterConfig.processDefinitionKey"
+                        style="min-width:250px">
+                    <option value=""></option>
+                    <option ng-title="123" ng-repeat="key in processDefinitionsKeys" value="{{key}}">{{key}}</option>
+                </select>
+            </td>
+
+        </tr>
+        <tr>
+            <td class="edit-label" translate="FILTERS-CONFIG.GRID.SQLQUERY"></td>
+            <td>
+                <textarea rows="4" class="form-control" id="sqlquery"
+                          ng-model="model.filterConfig.sqlQuery"></textarea>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="modal-footer-wrapper">
+    <div class="modal-footer">
+        <div ng-if="model.error" class="pull-left error-text">
+            <div ng-switch="model.error.statusCode">
+                 <span ng-switch-when="401">
+                    {{'FUNCTIONAL-MAPPING.POPUP.ERROR-401' | translate}}
+                </span>
+                <span ng-switch-when="403">
+                {{'FUNCTIONAL-MAPPING.POPUP.ERROR-403' | translate}}
+                </span>
+                <span ng-switch-when="500">
+                    {{ model.error.message }}
+                </span>
+                <span ng-switch-default>
+                    {{model.error.statusCode}} : {{model.error.message}}
+                </span>
+            </div>
+        </div>
+        <div class="pull-right">
+            <button type="button" class="btn btn-sm btn-default" ng-click="cancel()" ng-disabled="status.loading"
+                    translate="GENERAL.ACTION.CANCEL">
+            </button>
+            <button type="button" class="btn btn-sm btn-default" ng-click="ok()" ng-disabled="status.loading || !model.filterConfig.filterName || !model.filterConfig.processIdColumnName || !model.filterConfig.processDefinitionKey  || !model.filterConfig.sqlQuery"
+                    translate="FILTERS-CONFIG.POPUP.ADD.ACTION-CONFIRM">
+            </button>
+        </div>
+        <loading-indicator></loading-indicator>
+    </div>
+</div>

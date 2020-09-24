@@ -1,0 +1,73 @@
+<div class="modal-header-wrapper">
+    <div class="modal-header">
+        <div class="pull-right">
+            <a class="action" ng-click="cancel()" ng-show="!status.loading">&times; Cancel and close</a>
+        </div>
+        <h2>Add database configuration</h2>
+    </div>
+</div>
+<div class="modal-body">
+    <table class="edit-table">
+        <tr>
+            <td class="edit-label" translate="DATABASE.POPUP.EDIT-DATABASE.DATABASE-URL"></td>
+            <td>
+                <input type="text" class="form-control" id="databaseUrl"
+                       ng-model="model.database.databaseUrl">
+            </td>
+        </tr>
+        <tr>
+            <td class="edit-label" translate="DATABASE.POPUP.EDIT-DATABASE.DATABASE-SCHEMA"></td>
+            <td>
+                <input type="text" class="form-control" id="databaseSchema"
+                       ng-model="model.database.databaseSchema">
+            </td>
+
+        </tr>
+        <tr>
+            <td class="edit-label" translate="DATABASE.POPUP.EDIT-DATABASE.DATABASE-USERNAME"></td>
+            <td>
+                <input type="text" class="form-control" id="databaseUserName"
+                       ng-model="model.database.databaseUsername">
+            </td>
+        </tr>
+        <tr>
+            <td class="edit-label" translate="DATABASE.POPUP.EDIT-DATABASE.DATABASE-PASSWORD"></td>
+            <td>
+                <input ng-if="model.database.id" type="password" class="form-control" id="databasePassword"
+                       ng-model="model.database.databasePassword" placeholder="{{'DATABASE.POPUP.EDIT-DATABASE.DATABASE-PASSWORD-HELP' | translate}}">
+                <input ng-if="!model.database.id" type="password" class="form-control" id="databasePassword" ng-model="model.database.databasePassword">
+            </td>
+        </tr>
+
+    </table>
+</div>
+
+<div class="modal-footer-wrapper">
+    <div class="modal-footer">
+        <div ng-if="model.error" class="pull-left error-text">
+            <div ng-switch="model.error.statusCode">
+                 <span ng-switch-when="401">
+                    {{'DATABASE.POPUP.EDIT-DATABASE.ERROR-401' | translate}}
+                </span>
+                <span ng-switch-when="403">
+                {{'DATABASE.POPUP.EDIT-DATABASE.ERROR-403' | translate}}
+                </span>
+                <span ng-switch-when="500">
+                    {{'DATABASE.POPUP.EDIT-DATABASE.ERROR-500' | translate}}
+                </span>
+                <span ng-switch-default>
+                    {{model.error.statusCode}} : {{model.error.message}}
+                </span>
+            </div>
+        </div>
+        <div class="pull-right">
+            <button type="button" class="btn btn-sm btn-default" ng-click="cancel()" ng-disabled="status.loading"
+                    translate="GENERAL.ACTION.CANCEL">
+            </button>
+            <button type="button" class="btn btn-sm btn-default" ng-click="ok()" ng-disabled="status.loading || !model.database.databaseUrl"
+                    translate="DATABASE.POPUP.EDIT-DATABASE.ACTION-CONFIRM">
+            </button>
+        </div>
+        <loading-indicator></loading-indicator>
+    </div>
+</div>
